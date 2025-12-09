@@ -50,7 +50,7 @@ export class DashboardComponent implements OnInit {
     if (this.user.role === 'admin') {
       observable = this.ticketService.getTickets();
     } else if (this.user.role === 'client') {
-      observable = this.ticketService.getTicketsByClient(this.user.userId || this.user.sub || this.user.id);
+      observable = this.ticketService.getTicketsByClient(this.user.sub);
     } else if (this.user.role === 'technician') {
       observable = this.ticketService.getTicketsByTechnician(this.user.sub);
     }

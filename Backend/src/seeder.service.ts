@@ -136,72 +136,72 @@ export class SeederService implements OnModuleInit {
 
         if (clients.length === 0 || technicians.length === 0 || categories.length === 0) return;
 
-        const ticketCount = await this.ticketRepository.count();
-        if (ticketCount >= 20) return; // Don't seed if we already have enough tickets
-
         const priorities = [TicketPriority.LOW, TicketPriority.MEDIUM, TicketPriority.HIGH];
         const statuses = [TicketStatus.OPEN, TicketStatus.IN_PROGRESS, TicketStatus.RESOLVED, TicketStatus.CLOSED];
 
-        for (let i = 1; i <= 20; i++) {
-            const client = clients[Math.floor(Math.random() * clients.length)];
-            const technician = Math.random() > 0.3 ? technicians[Math.floor(Math.random() * technicians.length)] : null;
-            const category = categories[Math.floor(Math.random() * categories.length)];
-            const status = statuses[Math.floor(Math.random() * statuses.length)];
-            const priority = priorities[Math.floor(Math.random() * priorities.length)];
-
-            const ticket = this.ticketRepository.create({
-                title: `Ticket Issue #${i}`,
-                description: `This is a generated description for ticket #${i}. It involves ${category.name}.`,
-                priority,
-                status,
-                category,
-                client,
-                technician: status !== TicketStatus.OPEN ? (technician || undefined) : undefined // Open tickets might not have tech yet
-            });
-            await this.ticketRepository.save(ticket);
-        }
-
-        // GUARANTEE: Ensure EVERY client (1-5) has at least one ticket
+        // 1. Ensure Clients 1-5 have at least 3 tickets each
         for (let i = 1; i <= 5; i++) {
             const email = `client${i}@techhelpdesk.com`;
             const user = await this.userRepository.findOne({ where: { email }, relations: ['clientProfile'] });
 
             if (user && user.clientProfile) {
-                const count = await this.ticketRepository.count({ where: { client: { id: user.clientProfile.id } } });
-                if (count === 0) {
-                    console.log(`Seeder: Backfilling tickets for ${email}...`);
-                    await this.ticketRepository.save({
-                        title: `Issue for Client ${i}`,
-                        description: `Auto-generated ticket for client ${i} to ensure visibility.`,
-                        priority: TicketPriority.MEDIUM,
-                        status: TicketStatus.OPEN,
-                        category: categories[0],
-                        client: user.clientProfile
-                    });
+                const currentCount = await this.ticketRepository.count({ where: { client: { id: user.clientProfile.id } } });
+                const targetCount = 3;
+
+                if (currentCount < targetCount) {
+                    console.log(`Seeder: Creating tickets for ${email}...`);
+                    for (let j = currentCount; j < targetCount; j++) {
+                        const category = categories[j % categories.length];
+                        const status = statuses[j % statuses.length];
+                        const priority = priorities[j % priorities.length];
+
+                        // Randomly assign a technician if not OPEN
+                        let assignedTech: Technician | null = null;
+                        if (status !== TicketStatus.OPEN) {
+                            assignedTech = technicians[Math.floor(Math.random() * technicians.length)];
+                        }
+
+                        await this.ticketRepository.save({
+                            title: `Issue ${j + 1} for ${user.name}`,
+                            description: `Auto-generated ticket for ${user.name}. Category: ${category.name}.`,
+                            priority,
+                            status,
+                            category,
+                            client: user.clientProfile,
+                            technician: assignedTech || undefined
+                        });
+                    }
                 }
             }
         }
 
-        // GUARANTEE: Ensure EVERY technician (1-3) has at least one assigned ticket
+        // 2. Ensure Technicians 1-3 have at least 3 assigned tickets each
         for (let i = 1; i <= 3; i++) {
             const email = `tech${i}@techhelpdesk.com`;
             const user = await this.userRepository.findOne({ where: { email }, relations: ['technicianProfile'] });
 
             if (user && user.technicianProfile) {
-                const count = await this.ticketRepository.count({ where: { technician: { id: user.technicianProfile.id } } });
-                if (count === 0) {
-                    console.log(`Seeder: Backfilling assignment for ${email}...`);
-                    // Assign to a random client
-                    const randomClient = clients[Math.floor(Math.random() * clients.length)];
-                    await this.ticketRepository.save({
-                        title: `Assigned Task for Tech ${i}`,
-                        description: `Auto-generated assignment for technician ${i}.`,
-                        priority: TicketPriority.HIGH,
-                        status: TicketStatus.IN_PROGRESS,
-                        category: categories[1],
-                        client: randomClient,
-                        technician: user.technicianProfile
-                    });
+                const currentCount = await this.ticketRepository.count({ where: { technician: { id: user.technicianProfile.id } } });
+                const targetCount = 3;
+
+                if (currentCount < targetCount) {
+                    console.log(`Seeder: Assigning tickets to ${email}...`);
+                    for (let j = currentCount; j < targetCount; j++) {
+                        const category = categories[(j + 2) % categories.length]; // Offset category
+                        const status = TicketStatus.IN_PROGRESS;
+                        const priority = TicketPriority.HIGH;
+                        const client = clients[Math.floor(Math.random() * clients.length)];
+
+                        await this.ticketRepository.save({
+                            title: `Assigned Task ${j + 1} for ${user.name}`,
+                            description: `Task assigned to ${user.name}. Priority: ${priority}.`,
+                            priority,
+                            status,
+                            category,
+                            client,
+                            technician: user.technicianProfile
+                        });
+                    }
                 }
             }
         }
