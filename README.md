@@ -55,7 +55,9 @@ TechHelpDesk/
 - Docker and Docker Compose (for PostgreSQL)
 - Git
 
-### Installation
+### Installation & Deployment
+
+The easiest way to run the entire application (Frontend, Backend, and Database) is using Docker Compose.
 
 1. **Clone the repository**
 ```bash
@@ -63,20 +65,35 @@ git clone <repository-url>
 cd TechHelpDesk
 ```
 
-2. **Start PostgreSQL database**
+2. **Run with Docker Compose**
 ```bash
-docker-compose up -d
+docker-compose up --build
 ```
 
-3. **Setup Backend**
+This command will:
+- Build the Backend image
+- Build the Frontend image (served via Nginx)
+- Start the PostgreSQL database
+- Connect everything automatically
+
+### Manual Installation (Development)
+
+If you prefer to run services individually for development:
+
+1. **Start Database**
+```bash
+docker-compose up postgres -d
+```
+
+2. **Setup Backend**
 ```bash
 cd Backend
 npm install
-cp .env.example .env  # Configure environment variables
+cp .env.example .env
 npm run start:dev
 ```
 
-4. **Setup Frontend**
+3. **Setup Frontend**
 ```bash
 cd Frontend
 npm install
