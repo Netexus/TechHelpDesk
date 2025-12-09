@@ -18,7 +18,9 @@ const mockTicketRepository = {
     count: jest.fn(),
 };
 
-const mockUsersService = {};
+const mockUsersService = {
+    findOne: jest.fn(),
+};
 
 const mockCategoriesService = {
     findOne: jest.fn(),
@@ -87,6 +89,7 @@ describe('TicketsService', () => {
             ticketRepository.findOne.mockResolvedValue(ticket);
             ticketRepository.count.mockResolvedValue(0); // Less than 5 tickets
             ticketRepository.save.mockResolvedValue({ ...ticket, status: TicketStatus.IN_PROGRESS, technician: user.technicianProfile });
+            (service as any).usersService.findOne.mockResolvedValue(user);
 
             const result = await service.updateStatus('t-1', TicketStatus.IN_PROGRESS, user);
             expect(result.status).toBe(TicketStatus.IN_PROGRESS);
@@ -106,6 +109,7 @@ describe('TicketsService', () => {
 
             ticketRepository.findOne.mockResolvedValue(ticket);
             ticketRepository.count.mockResolvedValue(5);
+            (service as any).usersService.findOne.mockResolvedValue(user);
 
             await expect(service.updateStatus('t-1', TicketStatus.IN_PROGRESS, user)).rejects.toThrow(BadRequestException);
         });

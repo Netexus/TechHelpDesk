@@ -67,17 +67,31 @@ export class TicketsService {
         console.log(`Finding tickets for client (User ID): ${userId}`);
         const tickets = await this.ticketsRepository.find({
             where: { client: { user: { id: userId } } },
-            relations: ['category', 'technician', 'client', 'client.user']
+            relations: ['category', 'technician', 'technician.user', 'client', 'client.user']
         });
         console.log(`Found ${tickets.length} tickets for client ${userId}`);
         return tickets;
     }
 
     async findByTechnician(userId: string) {
-        return this.ticketsRepository.find({
+        // Return tickets assigned to this technician + all open (unassigned) tickets
+        // This allows technicians to see available work and their current assignments
+        const assignedTickets = await this.ticketsRepository.find({
             where: { technician: { user: { id: userId } } },
+            relations: ['category', 'client', 'client.user', 'technician', 'technician.user']
+        });
+
+        const openTickets = await this.ticketsRepository.find({
+            where: {
+                status: TicketStatus.OPEN,
+                technician: null as any  // TypeORM uses null to check for IS NULL
+            },
             relations: ['category', 'client', 'client.user']
         });
+
+        // Combine both arrays and remove duplicates (though there shouldn't be any)
+        const allTickets = [...openTickets, ...assignedTickets];
+        return allTickets;
     }
 
     async updateStatus(id: string, status: TicketStatus, user: User) {
@@ -86,24 +100,33 @@ export class TicketsService {
         // Validation: Technician max 5 tickets in progress
         if (status === TicketStatus.IN_PROGRESS) {
             if (user.role === UserRole.TECHNICIAN) {
+                // Load full user with technician profile (JWT only has userId, email, role)
+                const userId = (user as any).userId || user.id;
+                const fullUser = await this.usersService.findOne(userId);
+
+                if (!fullUser.technicianProfile) {
+                    throw new BadRequestException('Technician profile not found');
+                }
+
                 const inProgressCount = await this.ticketsRepository.count({
                     where: {
-                        technician: { id: user.technicianProfile.id },
+                        technician: { id: fullUser.technicianProfile.id },
                         status: TicketStatus.IN_PROGRESS
                     }
                 });
                 if (inProgressCount >= 5) {
                     throw new BadRequestException('Technician cannot have more than 5 tickets in progress');
                 }
-                // Assign technician if not assigned?
+                // Assign technician if not assigned
                 if (!ticket.technician) {
-                    ticket.technician = user.technicianProfile;
+                    console.log(`Assigning ticket ${id} to technician ${fullUser.name} (${fullUser.technicianProfile.id})`);
+                    ticket.technician = fullUser.technicianProfile;
                 }
             }
         }
 
         // Validation: Status flow
-        // Abierto → En progreso → Resuelto → Cerrado
+        // Open → In Progress → Resolved → Closed
         const validTransitions: Record<TicketStatus, TicketStatus[]> = {
             [TicketStatus.OPEN]: [TicketStatus.IN_PROGRESS],
             [TicketStatus.IN_PROGRESS]: [TicketStatus.RESOLVED],

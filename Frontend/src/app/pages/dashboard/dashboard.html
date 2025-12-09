@@ -3,8 +3,18 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <div>
             <h1>Dashboard</h1>
-            <p style="color: var(--color-text-light);">Welcome back, <strong>{{ user?.name }}</strong> ({{ user?.role
-                }})</p>
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-top: 0.5rem;">
+                <p style="color: var(--color-text-light); margin: 0;">
+                    Logged in as: <strong style="color: var(--color-text);">{{ user?.name }}</strong>
+                </p>
+                <span
+                    style="display: inline-block; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;"
+                    [style.background]="user?.role === 'admin' ? '#ef4444' : user?.role === 'technician' ? '#3b82f6' : '#10b981'"
+                    [style.color]="'white'">
+                    {{ user?.role }}
+                </span>
+            </div>
+            <p style="color: var(--color-text-light); font-size: 0.875rem; margin-top: 0.25rem;">{{ user?.email }}</p>
         </div>
         <div style="display: flex; gap: 1rem;">
             <button *ngIf="user?.role === 'client'" class="btn btn-primary"
@@ -27,11 +37,138 @@
             <h3 style="font-size: 1rem; color: var(--color-text-light);">Total Tickets</h3>
             <p style="font-size: 2rem; font-weight: 700; color: var(--color-primary);">{{ tickets.length }}</p>
         </div>
-        <!-- Add more stats if available -->
+        <div class="card" *ngIf="user?.role === 'technician'">
+            <h3 style="font-size: 1rem; color: var(--color-text-light);">Available</h3>
+            <p style="font-size: 2rem; font-weight: 700; color: var(--color-success);">{{ availableTickets.length }}</p>
+        </div>
+        <div class="card" *ngIf="user?.role === 'technician'">
+            <h3 style="font-size: 1rem; color: var(--color-text-light);">My Tickets</h3>
+            <p style="font-size: 2rem; font-weight: 700; color: var(--color-primary);">{{ myTickets.length }}</p>
+        </div>
     </div>
 
-    <!-- Tickets List -->
-    <div class="card">
+    <!-- For Technicians: Show Available Tickets and My Tickets separately -->
+    <div *ngIf="user?.role === 'technician'">
+        <!-- Available Tickets Section -->
+        <div class="card" style="margin-bottom: 2rem;" *ngIf="availableTickets.length > 0">
+            <h2 style="margin-bottom: 1.5rem; color: var(--color-success);">📋 Available Tickets</h2>
+            <p style="color: var(--color-text-light); margin-bottom: 1rem;">These tickets are waiting to be assigned.
+                Click "Start" to begin working on them.</p>
+
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="text-align: left; border-bottom: 2px solid #f1f5f9;">
+                            <th style="padding: 1rem;">ID</th>
+                            <th style="padding: 1rem;">Title</th>
+                            <th style="padding: 1rem;">Client</th>
+                            <th style="padding: 1rem;">Priority</th>
+                            <th style="padding: 1rem;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let ticket of availableTickets" style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 1rem; font-family: monospace; color: var(--color-text-light);">
+                                #{{ ticket.id.substring(0, 8) }}
+                            </td>
+                            <td style="padding: 1rem;">
+                                <div style="font-weight: 600; cursor: pointer; color: var(--color-primary);"
+                                    (click)="router.navigate(['/tickets', ticket.id])">{{ ticket.title }}</div>
+                                <div style="font-size: 0.85rem; color: var(--color-text-light);">
+                                    {{ ticket.description | slice:0:50 }}...
+                                </div>
+                            </td>
+                            <td style="padding: 1rem;">
+                                <div style="font-size: 0.875rem;">{{ ticket.client?.user?.name || 'N/A' }}</div>
+                                <div style="font-size: 0.75rem; color: var(--color-text-light);">{{
+                                    ticket.client?.company || '' }}</div>
+                            </td>
+                            <td style="padding: 1rem;">
+                                <span [style.color]="ticket.priority === 'high' ? 'var(--color-danger)' : 'inherit'"
+                                    style="text-transform: capitalize; font-weight: 500;">
+                                    {{ ticket.priority }}
+                                </span>
+                            </td>
+                            <td style="padding: 1rem;">
+                                <button (click)="updateStatus(ticket, 'in_progress')" class="btn btn-primary"
+                                    style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+                                    🚀 Start Working
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- My Tickets Section -->
+        <div class="card">
+            <h2 style="margin-bottom: 1.5rem;">🔧 My Assigned Tickets</h2>
+
+            <div *ngIf="myTickets.length === 0"
+                style="text-align: center; padding: 2rem; color: var(--color-text-light);">
+                <p>You have no assigned tickets.</p>
+            </div>
+
+            <div *ngIf="myTickets.length > 0" style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="text-align: left; border-bottom: 2px solid #f1f5f9;">
+                            <th style="padding: 1rem;">ID</th>
+                            <th style="padding: 1rem;">Title</th>
+                            <th style="padding: 1rem;">Client</th>
+                            <th style="padding: 1rem;">Priority</th>
+                            <th style="padding: 1rem;">Status</th>
+                            <th style="padding: 1rem;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let ticket of myTickets" style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 1rem; font-family: monospace; color: var(--color-text-light);">
+                                #{{ ticket.id.substring(0, 8) }}
+                            </td>
+                            <td style="padding: 1rem;">
+                                <div style="font-weight: 600; cursor: pointer; color: var(--color-primary);"
+                                    (click)="router.navigate(['/tickets', ticket.id])">{{ ticket.title }}</div>
+                                <div style="font-size: 0.85rem; color: var(--color-text-light);">
+                                    {{ ticket.description | slice:0:50 }}...
+                                </div>
+                            </td>
+                            <td style="padding: 1rem;">
+                                <div style="font-size: 0.875rem;">{{ ticket.client?.user?.name || 'N/A' }}</div>
+                            </td>
+                            <td style="padding: 1rem;">
+                                <span [style.color]="ticket.priority === 'high' ? 'var(--color-danger)' : 'inherit'"
+                                    style="text-transform: capitalize; font-weight: 500;">
+                                    {{ ticket.priority }}
+                                </span>
+                            </td>
+                            <td style="padding: 1rem;">
+                                <span [class]="getStatusClass(ticket.status)">{{ ticket.status }}</span>
+                            </td>
+                            <td style="padding: 1rem;">
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <button *ngIf="ticket.status === 'in_progress'"
+                                        (click)="updateStatus(ticket, 'resolved')" class="btn btn-success"
+                                        style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background: var(--color-success); color: white;">
+                                        Resolve
+                                    </button>
+                                    <button *ngIf="ticket.status === 'resolved'"
+                                        (click)="updateStatus(ticket, 'closed')" class="btn btn-secondary"
+                                        style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background: var(--color-text-light); color: white;">
+                                        Close
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- For Admin and Clients: Show all tickets as before -->
+    <div class="card" *ngIf="user?.role !== 'technician'">
         <h2 style="margin-bottom: 1.5rem;">Recent Tickets</h2>
 
         <div *ngIf="tickets.length === 0" style="text-align: center; padding: 2rem; color: var(--color-text-light);">
@@ -46,18 +183,21 @@
                         <th style="padding: 1rem;">Title</th>
                         <th style="padding: 1rem;">Priority</th>
                         <th style="padding: 1rem;">Status</th>
+                        <th style="padding: 1rem;" *ngIf="user?.role === 'client'">Technician</th>
                         <th style="padding: 1rem;" *ngIf="user?.role !== 'client'">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr *ngFor="let ticket of tickets" style="border-bottom: 1px solid #f1f5f9;">
-                        <td style="padding: 1rem; font-family: monospace; color: var(--color-text-light);">#{{
-                            ticket.id.substring(0, 8) }}</td>
+                        <td style="padding: 1rem; font-family: monospace; color: var(--color-text-light);">
+                            #{{ ticket.id.substring(0, 8) }}
+                        </td>
                         <td style="padding: 1rem;">
                             <div style="font-weight: 600; cursor: pointer; color: var(--color-primary);"
                                 (click)="router.navigate(['/tickets', ticket.id])">{{ ticket.title }}</div>
-                            <div style="font-size: 0.85rem; color: var(--color-text-light);">{{ ticket.description |
-                                slice:0:50 }}...</div>
+                            <div style="font-size: 0.85rem; color: var(--color-text-light);">
+                                {{ ticket.description | slice:0:50 }}...
+                            </div>
                         </td>
                         <td style="padding: 1rem;">
                             <span [style.color]="ticket.priority === 'high' ? 'var(--color-danger)' : 'inherit'"
@@ -68,6 +208,24 @@
                         <td style="padding: 1rem;">
                             <span [class]="getStatusClass(ticket.status)">{{ ticket.status }}</span>
                         </td>
+                        <td style="padding: 1rem;" *ngIf="user?.role === 'client'">
+                            <div *ngIf="ticket.technician" style="display: flex; align-items: center; gap: 0.5rem;">
+                                <div
+                                    style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.875rem;">
+                                    {{ ticket.technician.user?.name?.charAt(0).toUpperCase() || 'T' }}
+                                </div>
+                                <div>
+                                    <div style="font-weight: 500; font-size: 0.875rem;">{{ ticket.technician.user?.name
+                                        || 'Technician' }}</div>
+                                    <div style="font-size: 0.75rem; color: var(--color-text-light);">{{
+                                        ticket.technician.user?.email }}</div>
+                                </div>
+                            </div>
+                            <div *ngIf="!ticket.technician"
+                                style="color: var(--color-text-light); font-size: 0.875rem; font-style: italic;">
+                                Waiting for assignment
+                            </div>
+                        </td>
                         <td style="padding: 1rem;" *ngIf="user?.role !== 'client'">
                             <div style="display: flex; gap: 0.5rem;">
                                 <button *ngIf="ticket.status === 'open'" (click)="updateStatus(ticket, 'in_progress')"
@@ -75,10 +233,14 @@
                                     style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Start</button>
                                 <button *ngIf="ticket.status === 'in_progress'"
                                     (click)="updateStatus(ticket, 'resolved')" class="btn btn-success"
-                                    style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background: var(--color-success); color: white;">Resolve</button>
+                                    style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background: var(--color-success); color: white;">
+                                    Resolve
+                                </button>
                                 <button *ngIf="ticket.status === 'resolved'" (click)="updateStatus(ticket, 'closed')"
                                     class="btn btn-secondary"
-                                    style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background: var(--color-text-light); color: white;">Close</button>
+                                    style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background: var(--color-text-light); color: white;">
+                                    Close
+                                </button>
                             </div>
                         </td>
                     </tr>

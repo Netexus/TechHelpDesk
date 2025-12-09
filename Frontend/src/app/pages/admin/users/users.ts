@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../../services/auth';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-users',
@@ -12,6 +14,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class UsersComponent implements OnInit {
   users: any[] = [];
+  user: any = null;
   newUser = {
     name: '',
     email: '',
@@ -21,9 +24,10 @@ export class UsersComponent implements OnInit {
   loading = false;
   error = '';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private authService: AuthService, public router: Router) { }
 
   ngOnInit() {
+    this.authService.currentUser$.subscribe(user => this.user = user);
     this.loadUsers();
   }
 

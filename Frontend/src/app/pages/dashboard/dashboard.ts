@@ -15,6 +15,18 @@ export class DashboardComponent implements OnInit {
   user: any = null;
   tickets: any[] = [];
 
+  // Computed properties for technician view
+  get availableTickets() {
+    return this.tickets.filter(t => t.status === 'open' && !t.technician);
+  }
+
+  get myTickets() {
+    if (this.user?.role === 'technician') {
+      return this.tickets.filter(t => t.technician && t.technician.user?.id === this.user.sub);
+    }
+    return this.tickets;
+  }
+
   constructor(private authService: AuthService, private ticketService: TicketService, public router: Router) { }
 
   ngOnInit() {
@@ -27,19 +39,7 @@ export class DashboardComponent implements OnInit {
   }
 
   loadTickets() {
-    if (this.user.role === 'client') {
-      this.ticketService.getTickets().subscribe((res: any) => {
-        // Filter client tickets if backend doesn't do it automatically for this endpoint
-        // Ideally backend has specific endpoints, but for now we use the general one or specific if available
-        // Using the specific endpoint for clients would be better: /tickets/client/:id
-        // But let's check what we have. We have findByClient in backend.
-        // Let's try to use the general getTickets for now and see what it returns.
-        // Actually, let's use the proper endpoints based on role.
-        this.fetchRoleBasedTickets();
-      });
-    } else {
-      this.fetchRoleBasedTickets();
-    }
+    this.fetchRoleBasedTickets();
   }
 
   fetchRoleBasedTickets() {
@@ -77,7 +77,8 @@ export class DashboardComponent implements OnInit {
   updateStatus(ticket: any, newStatus: string) {
     this.ticketService.updateStatus(ticket.id, newStatus).subscribe({
       next: () => {
-        ticket.status = newStatus;
+        // Reload tickets to reflect changes (assignment, status update)
+        this.loadTickets();
       },
       error: (err) => alert('Failed to update status: ' + err.message)
     });

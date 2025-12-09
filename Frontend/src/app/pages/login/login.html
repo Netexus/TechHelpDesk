@@ -22,9 +22,29 @@
                 <input type="password" [(ngModel)]="password" name="password" required placeholder="••••••••">
             </div>
 
-            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Sign In</button>
+            <button type="submit" class="btn btn-primary" [disabled]="loading">
+                {{ loading ? 'Signing in...' : 'Sign In' }}
+            </button>
         </form>
 
+        <!-- Development Tools -->
+        <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--color-border);">
+            <p style="font-size: 0.875rem; color: var(--color-text-light); margin-bottom: 0.5rem;">Development Tools</p>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <a href="http://localhost:3000/api" target="_blank" class="btn btn-outline"
+                    style="font-size: 0.75rem; padding: 0.375rem 0.75rem;">
+                    📚 API Docs (Swagger)
+                </a>
+                <a href="http://localhost:3000/coverage/" target="_blank" class="btn btn-outline"
+                    style="font-size: 0.75rem; padding: 0.375rem 0.75rem;">
+                    🧪 Backend Tests
+                </a>
+                <button (click)="openTestReports()" class="btn btn-outline"
+                    style="font-size: 0.75rem; padding: 0.375rem 0.75rem;">
+                    📊 Test Reports
+                </button>
+            </div>
+        </div>
         <div style="margin-top: 1.5rem; text-align: center; font-size: 0.9rem; color: var(--color-text-light);">
             <p>Demo Credentials:</p>
             <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-top: 0.5rem;">
