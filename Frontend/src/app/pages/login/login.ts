@@ -16,7 +16,9 @@ export class LoginComponent {
   password = '';
   error = '';
 
-  constructor(private authService: AuthService, private router: Router) { }
+  constructor(private authService: AuthService, private router: Router) {
+    console.log('LoginComponent: Initialized');
+  }
 
   login() {
     this.authService.login({ email: this.email, password: this.password }).subscribe({

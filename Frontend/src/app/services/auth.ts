@@ -14,15 +14,23 @@ export class AuthService {
   constructor(private http: HttpClient) {
     const token = localStorage.getItem('token');
     if (token) {
-      this.currentUserSubject.next(jwtDecode(token));
+      try {
+        this.currentUserSubject.next(jwtDecode(token));
+      } catch (error) {
+        console.error('Invalid token found, clearing storage', error);
+        localStorage.removeItem('token');
+      }
     }
   }
 
   login(credentials: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/login`, credentials).pipe(
       tap((response: any) => {
-        localStorage.setItem('token', response.access_token);
-        this.currentUserSubject.next(jwtDecode(response.access_token));
+        const token = response.data?.access_token || response.access_token;
+        if (token) {
+          localStorage.setItem('token', token);
+          this.currentUserSubject.next(jwtDecode(token));
+        }
       })
     );
   }

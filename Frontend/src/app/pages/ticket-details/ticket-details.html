@@ -1,0 +1,65 @@
+<div class="container" style="padding-top: 2rem;">
+    <button class="btn btn-outline" (click)="router.navigate(['/dashboard'])" style="margin-bottom: 1rem;">
+        ← Back to Dashboard
+    </button>
+
+    <div *ngIf="loading" style="text-align: center; padding: 2rem;">
+        <p>Loading ticket details...</p>
+    </div>
+
+    <div *ngIf="error" class="error-msg">
+        {{ error }}
+    </div>
+
+    <div *ngIf="ticket" class="card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
+            <div>
+                <h1 style="margin-bottom: 0.5rem;">{{ ticket.title }}</h1>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <span [class]="getStatusClass(ticket.status)">{{ ticket.status }}</span>
+                    <span style="color: var(--color-text-light);">Priority: <strong
+                            [style.color]="ticket.priority === 'high' ? 'var(--color-danger)' : 'inherit'">{{
+                            ticket.priority | titlecase }}</strong></span>
+                    <span style="color: var(--color-text-light); font-family: monospace;">ID: #{{ ticket.id.substring(0,
+                        8) }}</span>
+                </div>
+            </div>
+
+            <!-- Actions for Admin/Tech -->
+            <div *ngIf="user?.role !== 'client'" style="display: flex; gap: 0.5rem;">
+                <button *ngIf="ticket.status === 'open'" (click)="updateStatus('in_progress')"
+                    class="btn btn-primary">Start Progress</button>
+                <button *ngIf="ticket.status === 'in_progress'" (click)="updateStatus('resolved')"
+                    class="btn btn-success" style="background: var(--color-success); color: white;">Resolve
+                    Issue</button>
+                <button *ngIf="ticket.status === 'resolved'" (click)="updateStatus('closed')" class="btn btn-secondary"
+                    style="background: var(--color-text-light); color: white;">Close Ticket</button>
+            </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin-bottom: 1.5rem;">
+
+        <div style="margin-bottom: 2rem;">
+            <h3
+                style="color: var(--color-text-light); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                Description</h3>
+            <p style="font-size: 1.1rem; white-space: pre-wrap;">{{ ticket.description }}</p>
+        </div>
+
+        <div
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; background: #f8fafc; padding: 1.5rem; border-radius: var(--radius-sm);">
+            <div>
+                <span style="display: block; font-size: 0.85rem; color: var(--color-text-light);">Category</span>
+                <strong>{{ ticket.category?.name || 'Uncategorized' }}</strong>
+            </div>
+            <div>
+                <span style="display: block; font-size: 0.85rem; color: var(--color-text-light);">Created</span>
+                <strong>{{ ticket.createdAt | date:'medium' }}</strong>
+            </div>
+            <div>
+                <span style="display: block; font-size: 0.85rem; color: var(--color-text-light);">Last Updated</span>
+                <strong>{{ ticket.updatedAt | date:'medium' }}</strong>
+            </div>
+        </div>
+    </div>
+</div>

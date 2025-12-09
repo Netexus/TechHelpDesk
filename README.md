@@ -27,6 +27,12 @@ TechHelpDesk is a support ticket management system built with NestJS. It allows 
 The API documentation is available at:
 `http://localhost:3000/api`
 
+### How to test endpoints:
+1.  **Login**: Go to `POST /auth/login`, click "Try it out", enter admin credentials, and execute.
+2.  **Copy Token**: Copy the `access_token` from the response body.
+3.  **Authorize**: Click the "Authorize" button at the top of the page. Paste the token (just the token, no "Bearer " prefix needed if configured standardly, but usually Swagger handles it).
+4.  **Test**: Now you can try protected endpoints like `GET /users` or `GET /tickets`.
+
 ## Testing
 Run unit tests:
 ```bash

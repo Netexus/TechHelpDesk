@@ -17,6 +17,9 @@ export class TicketsService {
     ) { }
 
     async create(createTicketDto: CreateTicketDto, user: User) {
+        console.log('Creating ticket for user:', user);
+        console.log('User client profile:', user.clientProfile);
+
         const category = await this.categoriesService.findOne(createTicketDto.categoryId);
         if (!category) {
             throw new NotFoundException('Category not found');
@@ -28,6 +31,15 @@ export class TicketsService {
             // For now, assuming only clients create tickets for themselves as per requirements "Cliente: puede registrar nuevos tickets".
             if (user.role !== UserRole.CLIENT) {
                 throw new BadRequestException('Only clients can create tickets');
+            }
+            // If user is client but profile is missing, try to fetch it
+            // Note: user object from JWT strategy has userId, not id
+            const userId = (user as any).userId || user.id;
+            const fullUser = await this.usersService.findOne(userId);
+            if (fullUser && fullUser.clientProfile) {
+                user.clientProfile = fullUser.clientProfile;
+            } else {
+                throw new BadRequestException('Client profile not found for user');
             }
         }
 
@@ -51,12 +63,21 @@ export class TicketsService {
         return ticket;
     }
 
-    async findByClient(clientId: string) {
-        return this.ticketsRepository.find({ where: { client: { id: clientId } }, relations: ['category', 'technician'] });
+    async findByClient(userId: string) {
+        console.log(`Finding tickets for client (User ID): ${userId}`);
+        const tickets = await this.ticketsRepository.find({
+            where: { client: { user: { id: userId } } },
+            relations: ['category', 'technician', 'client', 'client.user']
+        });
+        console.log(`Found ${tickets.length} tickets for client ${userId}`);
+        return tickets;
     }
 
-    async findByTechnician(technicianId: string) {
-        return this.ticketsRepository.find({ where: { technician: { id: technicianId } }, relations: ['category', 'client'] });
+    async findByTechnician(userId: string) {
+        return this.ticketsRepository.find({
+            where: { technician: { user: { id: userId } } },
+            relations: ['category', 'client', 'client.user']
+        });
     }
 
     async updateStatus(id: string, status: TicketStatus, user: User) {

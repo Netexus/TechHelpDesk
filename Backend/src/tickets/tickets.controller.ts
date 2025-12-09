@@ -29,18 +29,6 @@ export class TicketsController {
     return this.ticketsService.findAll();
   }
 
-  @Get(':id')
-  @Roles(UserRole.ADMIN, UserRole.TECHNICIAN, UserRole.CLIENT)
-  findOne(@Param('id') id: string) {
-    return this.ticketsService.findOne(id);
-  }
-
-  @Patch(':id/status')
-  @Roles(UserRole.TECHNICIAN, UserRole.ADMIN)
-  updateStatus(@Param('id') id: string, @Body() updateTicketStatusDto: UpdateTicketStatusDto, @CurrentUser() user: User) {
-    return this.ticketsService.updateStatus(id, updateTicketStatusDto.status, user);
-  }
-
   @Get('client/:id')
   @Roles(UserRole.ADMIN, UserRole.CLIENT)
   findByClient(@Param('id') id: string) {
@@ -51,5 +39,17 @@ export class TicketsController {
   @Roles(UserRole.ADMIN, UserRole.TECHNICIAN)
   findByTechnician(@Param('id') id: string) {
     return this.ticketsService.findByTechnician(id);
+  }
+
+  @Get(':id')
+  @Roles(UserRole.ADMIN, UserRole.TECHNICIAN, UserRole.CLIENT)
+  findOne(@Param('id') id: string) {
+    return this.ticketsService.findOne(id);
+  }
+
+  @Patch(':id/status')
+  @Roles(UserRole.TECHNICIAN, UserRole.ADMIN)
+  updateStatus(@Param('id') id: string, @Body() updateTicketStatusDto: UpdateTicketStatusDto, @CurrentUser() user: User) {
+    return this.ticketsService.updateStatus(id, updateTicketStatusDto.status, user);
   }
 }

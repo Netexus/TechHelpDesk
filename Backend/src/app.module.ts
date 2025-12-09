@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
@@ -37,9 +38,19 @@ import { SeederService } from './seeder.service';
     CategoriesModule,
     TicketsModule,
     AuthModule,
-    TypeOrmModule.forFeature([User, Category, Client, Technician]),
+    TypeOrmModule.forFeature([User, Category, Ticket, Client, Technician]),
   ],
   controllers: [AppController],
   providers: [AppService, SeederService],
 })
-export class AppModule { }
+export class AppModule implements OnModuleInit {
+  constructor(private dataSource: DataSource) { }
+
+  onModuleInit() {
+    if (this.dataSource.isInitialized) {
+      console.log('✅ DATABASE CONNECTED SUCCESSFULLY');
+    } else {
+      console.error('❌ DATABASE CONNECTION FAILED');
+    }
+  }
+}
