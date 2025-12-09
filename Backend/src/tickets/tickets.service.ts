@@ -115,7 +115,7 @@ export class TicketsService {
                     }
                 });
                 if (inProgressCount >= 5) {
-                    throw new BadRequestException('Technician cannot have more than 5 tickets in progress');
+                    throw new BadRequestException('You have reached the limit of 5 tickets in progress. Please resolve some tickets before taking new ones.');
                 }
                 // Assign technician if not assigned
                 if (!ticket.technician) {

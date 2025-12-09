@@ -37,6 +37,32 @@
             <h3 style="font-size: 1rem; color: var(--color-text-light);">Total Tickets</h3>
             <p style="font-size: 2rem; font-weight: 700; color: var(--color-primary);">{{ tickets.length }}</p>
         </div>
+
+        <!-- Admin Stats -->
+        <ng-container *ngIf="user?.role === 'admin'">
+            <div class="card">
+                <h3 style="font-size: 1rem; color: var(--color-text-light);">Open</h3>
+                <p style="font-size: 2rem; font-weight: 700; color: #3b82f6;">{{ openTicketsCount }}</p>
+            </div>
+            <div class="card">
+                <h3 style="font-size: 1rem; color: var(--color-text-light);">In Progress</h3>
+                <p style="font-size: 2rem; font-weight: 700; color: #f59e0b;">{{ inProgressTicketsCount }}</p>
+            </div>
+            <div class="card">
+                <h3 style="font-size: 1rem; color: var(--color-text-light);">Resolved</h3>
+                <p style="font-size: 2rem; font-weight: 700; color: #10b981;">{{ resolvedTicketsCount }}</p>
+            </div>
+            <div class="card">
+                <h3 style="font-size: 1rem; color: var(--color-text-light);">Closed</h3>
+                <p style="font-size: 2rem; font-weight: 700; color: #6b7280;">{{ closedTicketsCount }}</p>
+            </div>
+            <div class="card">
+                <h3 style="font-size: 1rem; color: var(--color-text-light);">High Priority</h3>
+                <p style="font-size: 2rem; font-weight: 700; color: #ef4444;">{{ highPriorityCount }}</p>
+            </div>
+        </ng-container>
+
+        <!-- Technician Stats -->
         <div class="card" *ngIf="user?.role === 'technician'">
             <h3 style="font-size: 1rem; color: var(--color-text-light);">Available</h3>
             <p style="font-size: 2rem; font-weight: 700; color: var(--color-success);">{{ availableTickets.length }}</p>
@@ -247,5 +273,14 @@
                 </tbody>
             </table>
         </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast-container" *ngIf="errorMessage">
+    <div class="toast toast-error">
+        <div style="color: #ef4444; font-size: 1.25rem;">⚠️</div>
+        <div class="toast-content">{{ errorMessage }}</div>
+        <button class="toast-close" (click)="closeError()">×</button>
     </div>
 </div>

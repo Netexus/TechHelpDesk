@@ -27,6 +27,30 @@ export class DashboardComponent implements OnInit {
     return this.tickets;
   }
 
+  // Computed properties for Admin view
+  get openTicketsCount() {
+    return this.tickets.filter(t => t.status === 'open').length;
+  }
+
+  get inProgressTicketsCount() {
+    return this.tickets.filter(t => t.status === 'in_progress').length;
+  }
+
+  get resolvedTicketsCount() {
+    return this.tickets.filter(t => t.status === 'resolved').length;
+  }
+
+  get closedTicketsCount() {
+    return this.tickets.filter(t => t.status === 'closed').length;
+  }
+
+  get highPriorityCount() {
+    return this.tickets.filter(t => t.priority === 'high').length;
+  }
+
+  errorMessage: string | null = null;
+  errorTimeout: any;
+
   constructor(private authService: AuthService, private ticketService: TicketService, public router: Router) { }
 
   ngOnInit() {
@@ -80,7 +104,24 @@ export class DashboardComponent implements OnInit {
         // Reload tickets to reflect changes (assignment, status update)
         this.loadTickets();
       },
-      error: (err) => alert('Failed to update status: ' + err.message)
+      error: (err) => {
+        console.error('Update status error:', err);
+        const message = err.error?.message || err.message || 'Unknown error';
+        this.showError(message);
+      }
     });
+  }
+
+  showError(message: string) {
+    this.errorMessage = message;
+    if (this.errorTimeout) clearTimeout(this.errorTimeout);
+    this.errorTimeout = setTimeout(() => {
+      this.errorMessage = null;
+    }, 5000);
+  }
+
+  closeError() {
+    this.errorMessage = null;
+    if (this.errorTimeout) clearTimeout(this.errorTimeout);
   }
 }
