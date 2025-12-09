@@ -10,6 +10,39 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - techhelpdesk-network
+
+  backend:
+    build: ./Backend
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: password
+      DB_DATABASE: techhelpdesk
+      JWT_SECRET: super-secret-key
+    depends_on:
+      - postgres
+    networks:
+      - techhelpdesk-network
+
+  frontend:
+    build: ./Frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+    networks:
+      - techhelpdesk-network
 
 volumes:
   postgres_data:
+
+
+networks:
+  techhelpdesk-network:
+
+
