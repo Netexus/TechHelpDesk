@@ -15,22 +15,13 @@ TechHelpDesk is a support ticket management system built with NestJS. It allows 
     cd Backend
     npm install
     ```
-3.  **Environment Variables**
-    Copy `.env.example` to `.env` and configure your database credentials.
+3.  **Frontend**: Angular application with Login and Dashboard.
     ```bash
-    cp .env.example .env
+    cd Frontend
+    npm install
+    npm start
     ```
-4.  **Database Setup**
-    Ensure you have PostgreSQL running. You can use Docker:
-    ```bash
-    docker-compose up -d
-    ```
-5.  **Run the application**
-    ```bash
-    npm run start:dev
-    ```
-    The application will start on `http://localhost:3000`.
-    Seeders will automatically populate the database with initial users and categories.
+    The application will start on `http://localhost:4200`.
 
 ## Swagger Documentation
 The API documentation is available at:
@@ -56,3 +47,4 @@ npm run test:cov
 - **Users**: Manage users, clients, and technicians.
 - **Tickets**: Create, update status, and list tickets.
 - **Categories**: Manage incident categories.
+- **Frontend**: Angular 19+ with Standalone Components.

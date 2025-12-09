@@ -1,0 +1,30 @@
+<div class="dashboard-container">
+    <header>
+        <h1>Dashboard - {{ user?.role }}</h1>
+        <button (click)="logout()">Logout</button>
+    </header>
+
+    <div *ngIf="user?.role === 'admin'">
+        <h2>All Tickets</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let ticket of tickets">
+                    <td>{{ ticket.title }}</td>
+                    <td>{{ ticket.status }}</td>
+                    <td>{{ ticket.priority }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div *ngIf="user?.role !== 'admin'">
+        <p>Welcome! Admin role has full ticket list view implemented.</p>
+    </div>
+</div>
