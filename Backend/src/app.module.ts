@@ -24,13 +24,14 @@ import { SeederService } from './seeder.service';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: configService.get<string>('DB_HOST'),
-        port: configService.get<number>('DB_PORT'),
-        username: configService.get<string>('DB_USERNAME'),
-        password: configService.get<string>('DB_PASSWORD'),
-        database: configService.get<string>('DB_NAME'),
+        url: configService.get<string>('DATABASE_URL'),
         entities: [User, Client, Technician, Category, Ticket],
-        synchronize: true, // For development only
+        synchronize: configService.get<string>('NODE_ENV') !== 'production',
+        ssl: {
+          rejectUnauthorized: false // ← Necesary for Supabase
+        },
+        logging: configService.get<string>('NODE_ENV') === 'development',
+        autoLoadEntities: true,
       }),
       inject: [ConfigService],
     }),
