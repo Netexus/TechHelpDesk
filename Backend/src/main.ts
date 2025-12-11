@@ -11,26 +11,25 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // CORS configuration for production
-  app.enableCors({
-    origin: (origin, callback) => {
-      const allowedOrigins = [
-        'http://localhost:4200',
-        'http://localhost:3000',
-        'https://techhelpfrontend.vercel.app',
-        'https://techhelpdesk-production-5771.up.railway.app',
-      ];
+  // app.enableCors({
+  //   origin: (origin, callback) => {
+  //     const allowedOrigins = [
+  //       'http://localhost:4200',
+  //       'https://techhelpfrontend.vercel.app',
+  //       'https://techhelpdesk-production-5771.up.railway.app'
+  //     ];
 
-      // Allow any Vercel preview deployment
-      if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app') || origin.endsWith('.railway.app')) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  });
+  // Allow any Vercel preview deployment
+  //     if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app') || origin.endsWith('.railway.app')) {
+  //       callback(null, true);
+  //     } else {
+  //       callback(new Error('Not allowed by CORS'));
+  //     }
+  //   },
+  //   credentials: true,
+  //   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  //   allowedHeaders: ['Content-Type', 'Authorization'],
+  // });
 
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new TransformInterceptor());
