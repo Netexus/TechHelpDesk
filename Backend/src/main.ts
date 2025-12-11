@@ -15,11 +15,13 @@ async function bootstrap() {
     origin: (origin, callback) => {
       const allowedOrigins = [
         'http://localhost:4200',
+        'http://localhost:3000',
         'https://techhelpfrontend.vercel.app',
+        'https://techhelpdesk-production-5771.up.railway.app',
       ];
 
       // Allow any Vercel preview deployment
-      if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+      if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app') || origin.endsWith('.railway.app')) {
         callback(null, true);
       } else {
         callback(new Error('Not allowed by CORS'));
