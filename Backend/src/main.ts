@@ -12,11 +12,19 @@ async function bootstrap() {
 
   // CORS configuration for production
   app.enableCors({
-    origin: [
-      'http://localhost:4200',
-      'https://techhelpfrontend.vercel.app',
-      'https://*.vercel.app'
-    ],
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        'http://localhost:4200',
+        'https://techhelpfrontend.vercel.app',
+      ];
+
+      // Allow any Vercel preview deployment
+      if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
