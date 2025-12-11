@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../services/auth';
 import { Router } from '@angular/router';
+import { environment } from '../../../../enviroments/environment';
 
 @Component({
   selector: 'app-categories',
@@ -13,6 +14,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./categories.css']
 })
 export class CategoriesComponent implements OnInit {
+  private apiUrl = `${environment.apiUrl}/categories`;
   categories: any[] = [];
   user: any = null;
   newCategory = {
@@ -30,7 +32,7 @@ export class CategoriesComponent implements OnInit {
   }
 
   loadCategories() {
-    this.http.get('http://localhost:3000/categories').subscribe({
+    this.http.get(this.apiUrl).subscribe({
       next: (res: any) => this.categories = res.data || res,
       error: (err) => console.error(err)
     });
@@ -38,7 +40,7 @@ export class CategoriesComponent implements OnInit {
 
   createCategory() {
     this.loading = true;
-    this.http.post('http://localhost:3000/categories', this.newCategory).subscribe({
+    this.http.post(this.apiUrl, this.newCategory).subscribe({
       next: () => {
         this.loading = false;
         this.loadCategories();

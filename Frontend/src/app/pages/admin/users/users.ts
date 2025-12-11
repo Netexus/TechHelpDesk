@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../services/auth';
 import { Router } from '@angular/router';
+import { environment } from '../../../../enviroments/environment';
 
 @Component({
   selector: 'app-users',
@@ -13,6 +14,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./users.css']
 })
 export class UsersComponent implements OnInit {
+  private apiUrl = `${environment.apiUrl}/users`;
   users: any[] = [];
   user: any = null;
   newUser = {
@@ -32,7 +34,7 @@ export class UsersComponent implements OnInit {
   }
 
   loadUsers() {
-    this.http.get('http://localhost:3000/users').subscribe({
+    this.http.get(this.apiUrl).subscribe({
       next: (res: any) => this.users = res.data || res,
       error: (err) => console.error(err)
     });
@@ -40,7 +42,7 @@ export class UsersComponent implements OnInit {
 
   createUser() {
     this.loading = true;
-    this.http.post('http://localhost:3000/users', this.newUser).subscribe({
+    this.http.post(this.apiUrl, this.newUser).subscribe({
       next: () => {
         this.loading = false;
         this.loadUsers();

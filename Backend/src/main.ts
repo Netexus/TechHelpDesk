@@ -3,7 +3,6 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
-
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
@@ -11,20 +10,33 @@ import { join } from 'path';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  app.enableCors();
+  // CORS configuration for production
+  app.enableCors({
+    origin: [
+      'http://localhost:4200',
+      'https://techhelpfrontend.vercel.app',
+      'https://*.vercel.app'
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
+
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new TransformInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  // Serve static files for test coverage reports
-  app.useStaticAssets(join(__dirname, '..', 'coverage', 'lcov-report'), {
-    prefix: '/coverage/',
-  });
+  // Serve static files only in development
+  if (process.env.NODE_ENV !== 'production') {
+    app.useStaticAssets(join(__dirname, '..', 'coverage', 'lcov-report'), {
+      prefix: '/coverage/',
+    });
+  }
 
   // Swagger/OpenAPI Configuration
   const config = new DocumentBuilder()
     .setTitle('TechHelpDesk API')
-    .setDescription('API documentation for TechHelpDesk ticket management system. Use the "Authorize" button to add your JWT token.')
+    .setDescription('API documentation for TechHelpDesk ticket management system.')
     .setVersion('1.0')
     .addBearerAuth(
       {
@@ -40,13 +52,15 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document, {
     swaggerOptions: {
-      persistAuthorization: true, // Keep token after page refresh
+      persistAuthorization: true,
     },
   });
 
-  await app.listen(process.env.PORT ?? 3000);
-  console.log('🚀 Application is running on: http://localhost:3000');
-  console.log('📚 Swagger documentation: http://localhost:3000/api');
-  console.log('🧪 Test coverage: http://localhost:3000/coverage/');
+  const port = process.env.PORT || 3000;
+  await app.listen(port, '0.0.0.0');
+
+  console.log(`🚀 Application running on port: ${port}`);
+  console.log(`📚 API Docs: https://techhelpdesk-production-5771.up.railway.app/api`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
 }
 bootstrap();

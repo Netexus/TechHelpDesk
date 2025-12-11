@@ -1,12 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../enviroments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TicketService {
-  private apiUrl = 'http://localhost:3000/tickets';
+  private apiUrl = `${environment.apiUrl}/tickets`;
+  private categoriesUrl = `${environment.apiUrl}/categories`;
 
   constructor(private http: HttpClient) { }
 
@@ -35,6 +37,6 @@ export class TicketService {
   }
 
   getCategories(): Observable<any> {
-    return this.http.get('http://localhost:3000/categories');
+    return this.http.get(this.categoriesUrl);
   }
 }
