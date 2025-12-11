@@ -31,11 +31,11 @@
         <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--color-border);">
             <p style="font-size: 0.875rem; color: var(--color-text-light); margin-bottom: 0.5rem;">Development Tools</p>
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                <a href="http://localhost:3000/api" target="_blank" class="btn btn-outline"
+                <a [href]="apiDocsUrl" target="_blank" class="btn btn-outline"
                     style="font-size: 0.75rem; padding: 0.375rem 0.75rem;">
                     📚 API Docs (Swagger)
                 </a>
-                <a href="http://localhost:3000/coverage/" target="_blank" class="btn btn-outline"
+                <a [href]="coverageUrl" target="_blank" class="btn btn-outline"
                     style="font-size: 0.75rem; padding: 0.375rem 0.75rem;">
                     🧪 Backend Tests
                 </a>
