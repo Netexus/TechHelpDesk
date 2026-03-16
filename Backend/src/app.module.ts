@@ -23,12 +23,13 @@ import { SeederService } from './seeder.service';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
+        type: 'mssql',
         url: configService.get<string>('DATABASE_URL'),
         entities: [User, Client, Technician, Category, Ticket],
         synchronize: configService.get<string>('NODE_ENV') !== 'production',
-        ssl: {
-          rejectUnauthorized: false // ← Necesary for Supabase
+        extra: {
+          trustServerCertificate: false,
+          encrypt: true
         },
         logging: configService.get<string>('NODE_ENV') === 'development',
         autoLoadEntities: true,
