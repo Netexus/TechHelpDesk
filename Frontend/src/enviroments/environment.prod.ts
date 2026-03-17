@@ -1,4 +1,4 @@
 export const environment = {
     production: true,
-    apiUrl: 'https://techhelpdesk-production-5771.up.railway.app'
+    apiUrl: 'https://helpdesk-api.azurewebsites.net'
 };
